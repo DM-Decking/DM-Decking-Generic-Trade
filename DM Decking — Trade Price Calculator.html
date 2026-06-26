@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DM Decking — Trade Price Calculator</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Georgia,serif;background:#f7f5f0;padding-bottom:60px}
+header{background:#1a1a1a;color:#fff;padding:18px 20px;display:flex;justify-content:space-between;align-items:center}
+header h1{font-family:'Arial Black',Arial,sans-serif;font-size:20px;font-weight:900}
+header p{font-size:10px;color:#aaa;margin-top:2px;letter-spacing:2px;text-transform:uppercase}
+.contact{text-align:right;font-size:11px;color:#888;line-height:1.6}
+.wrap{max-width:860px;margin:0 auto;padding:16px 12px 0}
+.order-box{background:#fff;border-radius:6px;padding:16px 18px;margin-bottom:10px;box-shadow:0 1px 4px rgba(0,0,0,.07)}
+.order-box h3{font-size:13px;font-weight:700;margin-bottom:10px;color:#1a1a1a}
+.fields{display:flex;gap:12px;flex-wrap:wrap}
+.fields>div{flex:1;min-width:160px}
+.fields label{font-size:11px;color:#888;display:block;margin-bottom:3px}
+.fields input{width:100%;padding:7px 9px;border:1px solid #ddd;border-radius:4px;font-size:13px}
+.sec{background:#1a1a1a;color:#fff;padding:9px 18px;font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;margin-top:8px;border-radius:6px 6px 0 0}
+.card{background:#fff;border-radius:0 0 6px 6px;box-shadow:0 1px 4px rgba(0,0,0,.07);margin-bottom:2px;overflow:hidden}
+.subhdr{display:flex;justify-content:space-between;padding:7px 18px 4px;font-size:10px;color:#888;font-weight:700;text-transform:uppercase;letter-spacing:1px;background:#faf9f7;border-bottom:1px solid #f0ede8}
+.row{display:flex;align-items:center;padding:6px 18px 6px 28px;border-bottom:1px solid #f7f5f0;gap:8px}
+.row.simple{padding-left:18px}
+.row .lbl{flex:1;font-size:13px;color:#333}
+.row .ph{font-size:11px;color:#bbb;min-width:70px;text-align:right}
+.row input{width:58px;padding:5px 6px;border:1px solid #ddd;border-radius:4px;font-size:13px;text-align:center}
+.row .tot{font-size:12px;min-width:65px;text-align:right;color:#ccc}
+.row .tot.on{color:#1a1a1a;font-weight:600}
+.gpad{padding:12px 18px}
+.ghint{font-size:11px;color:#888;margin-bottom:10px}
+.grow{display:flex;align-items:center;gap:6px;padding:6px 0;border-bottom:1px solid #f0ede8;flex-wrap:wrap}
+.grow select,.grow input{padding:6px 7px;border:1px solid #ddd;border-radius:4px;font-size:12px}
+.grow .wide{min-width:120px}
+.grow .w80{width:78px}
+.grow .w50{width:50px;text-align:center}
+.grow .w85{width:85px}
+.grow .hint{font-size:11px;color:#aaa}
+.grow .gtot{font-size:12px;font-weight:600;color:#1a1a1a;min-width:65px;text-align:right}
+.grow .err{font-size:10px;color:#e55;width:100%}
+.addbtn{background:none;border:1px dashed #ccc;border-radius:4px;padding:5px 12px;cursor:pointer;color:#888;font-size:12px;margin-top:8px}
+.rmbtn{background:none;border:1px solid #ddd;border-radius:4px;padding:3px 7px;cursor:pointer;color:#aaa;font-size:11px}
+.genbtn{width:100%;background:#1a1a1a;color:#fff;border:none;border-radius:6px;padding:15px 0;font-size:15px;font-weight:700;cursor:pointer;margin-top:14px;letter-spacing:1px;font-family:Georgia,serif}
+.qcard{background:#fff;border-radius:6px;padding:24px 20px 20px;margin-top:14px;box-shadow:0 1px 4px rgba(0,0,0,.07)}
+.qcard h2{font-size:17px;font-weight:700;margin-bottom:4px;color:#1a1a1a}
+.qmeta{font-size:12px;color:#666;margin-bottom:3px}
+.qdate{font-size:10px;color:#aaa;margin-bottom:14px}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th{text-align:left;padding:5px 0;color:#555;font-weight:600;font-size:10px;border-bottom:2px solid #1a1a1a}
+th.r{text-align:right;padding:5px 6px}
+th.rr{text-align:right}
+td{padding:6px 0;color:#222;border-bottom:1px solid #f0ede8}
+td.r{text-align:right;padding:6px 6px;color:#555}
+td.rr{text-align:right;font-weight:600;color:#1a1a1a}
+.tots{margin-top:14px;border-top:2px solid #1a1a1a;padding-top:10px}
+.trow{display:flex;justify-content:space-between;padding:3px 0;font-size:13px;color:#555}
+.trow.grand{font-size:17px;font-weight:700;color:#1a1a1a;border-top:1px solid #ddd;margin-top:6px;padding-top:8px}
+.fnote{margin-top:16px;padding:10px 14px;background:#f7f5f0;border-radius:4px;font-size:10px;color:#999}
+.prbtn{background:none;border:1px solid #ddd;border-radius:4px;padding:7px 14px;cursor:pointer;color:#555;font-size:12px;margin-top:10px}
+.empty{color:#999;font-size:13px;padding:10px 0}
+@media print{.genbtn,.prbtn,.addbtn,.rmbtn{display:none}}
+</style>
+</head>
+<body>
+<header>
+  <div><h1>DM Decking</h1><p>Trade Supply — Price Calculator</p></div>
+  <div class="contact">All prices exc. VAT<br>enquiries@dmdecking.co.uk<br>01786 450936</div>
+</header>
+<div class="wrap">
+
+<div class="order-box">
+  <h3>Order Details</h3>
+  <div class="fields">
+    <div><label>Customer / Company</label><input type="text" id="cname" placeholder="e.g. Glenesk Holiday Park"></div>
+    <div><label>Reference</label><input type="text" id="cref" placeholder="e.g. SS/Glenesk/001"></div>
+  </div>
+</div>
+
+<!-- DECK BOARDS -->
+<div class="sec">Deck Boards — FENSYS (180mm x 35mm)</div>
+<div class="card" id="s-boards"></div>
+
+<!-- SKIRTING -->
+<div class="sec">Skirting (6m x 150mm x 25mm)</div>
+<div class="card" id="s-skirting"></div>
+
+<!-- CORNER TRIMS -->
+<div class="sec">Corner Trims (2.5m x 40mm x 40mm)</div>
+<div class="card" id="s-corner"></div>
+
+<!-- BAL NF -->
+<div class="sec">Balustrades — Non Foiled</div>
+<div class="card" id="s-balnf"></div>
+
+<!-- BAL F -->
+<div class="sec">Balustrades — Foiled</div>
+<div class="card" id="s-balf"></div>
+
+<!-- RAIL STEEL -->
+<div class="sec">Rail Steel</div>
+<div class="card" id="s-steel"></div>
+
+<!-- GLASS -->
+<div class="sec">10mm Toughened Glass</div>
+<div class="card">
+  <div class="gpad">
+    <div class="ghint">Clear £50/m² | Tinted £90/m² — Enter dimensions in mm</div>
+    <div id="glasspanels"></div>
+    <button class="addbtn" onclick="addGlass()">+ Add Glass Panel</button>
+    <div style="margin-top:12px;border-top:1px solid #f0ede8;padding-top:10px" id="s-clamps"></div>
+  </div>
+</div>
+
+<!-- TIMBER -->
+<div class="sec">Timber &amp; Structural</div>
+<div class="card" id="s-timber"></div>
+
+<!-- GATES -->
+<div class="sec">Gates (inc. hinges, latch &amp; hook) — £129.60 each</div>
+<div class="card">
+  <div class="gpad">
+    <div class="ghint">Standard: 1000mm × 900mm. Bespoke max 1200×1200mm — same price, made to order, 4 week lead time.</div>
+    <div id="gaterows"></div>
+    <button class="addbtn" onclick="addGate()">+ Add Gate</button>
+  </div>
+</div>
+
+<button class="genbtn" onclick="generateQuote()">Generate Quote Summary</button>
+<div id="quoteout"></div>
+</div>
+
+<script>
+var items = {};
+var glass = [{type:'Clear',w:'',h:'',qty:1}];
+var gates = [{color:'White',w:'1000',h:'900',qty:1}];
+
+var BOARD_C = ['Cream','Beige','Painswick Grey','Driftwood','Anthracite','Tawny','Woodland Green','Antique Oak'];
+var SKIRT_F = ['Rustic Oak','Golden Oak','Green','Anthracite'];
+var CORN_S  = ['White','Beige','Painswick Grey'];
+var CORN_F  = ['Rustic Oak','Golden Oak','Green','Anthracite'];
+var BAL_NF  = ['White','Beige','Painswick Grey'];
+var BAL_F   = ['Green','Grey','Golden Oak','Rustic Oak'];
+var GATE_C  = ['White','Beige','Painswick Grey','Rustic Oak','Golden Oak','Green','Grey'];
+
+function f(n){return parseFloat(n).toFixed(2);}
+
+function colorBlock(colors,price,unit,key,label){
+  var h='<div class="subhdr"><span>'+label+'</span><span>£'+f(price)+' / '+unit+'</span></div>';
+  for(var i=0;i<colors.length;i++){
+    var c=colors[i], k=key+'_'+c;
+    h+='<div class="row"><span class="lbl">'+c+'</span><input type="number" min="0" placeholder="0" id="'+k+'" oninput="upd(\''+k+'\','+price+',\''+label+' \u2013 '+c+'\',\''+unit+'\')" /><span class="tot" id="t_'+k+'">—</span></div>';
+  }
+  return h;
+}
+
+function simpleBlock(rowsArr){
+  var h='';
+  for(var i=0;i<rowsArr.length;i++){
+    var r=rowsArr[i];
+    h+='<div class="row simple"><span class="lbl">'+r.label+'</span><span class="ph">£'+f(r.price)+'/'+r.unit+'</span><input type="number" min="0" placeholder="0" id="'+r.key+'" oninput="upd(\''+r.key+'\','+r.price+',\''+r.label+'\',\''+r.unit+'\')" /><span class="tot" id="t_'+r.key+'">—</span></div>';
+  }
+  return h;
+}
+
+function upd(key,price,label,unit){
+  var el=document.getElementById(key);
+  var v=parseFloat(el.value)||0;
+  var tel=document.getElementById('t_'+key);
+  if(v>0){
+    tel.textContent='£'+f(v*price);
+    tel.className='tot on';
+    items[key]={label:label,qty:v,price:price,unit:unit,total:v*price};
+  } else {
+    tel.textContent='—';
+    tel.className='tot';
+    delete items[key];
+  }
+}
+
+function renderGlass(){
+  var c=document.getElementById('glasspanels');
+  var h='';
+  for(var i=0;i<glass.length;i++){
+    var p=glass[i];
+    var w=parseFloat(p.w)||0,ht=parseFloat(p.h)||0,qty=parseFloat(p.qty)||1;
+    var area=(w/1000)*(ht/1000)*qty;
+    var pp=p.type==='Clear'?50:90;
+    var tot=area*pp;
+    h+='<div class="grow">';
+    h+='<select class="wide" onchange="glass['+i+'].type=this.value;renderGlass()"><option'+(p.type==='Clear'?' selected':'')+'>Clear</option><option'+(p.type==='Tinted'?' selected':'')+'>Tinted</option></select>';
+    h+='<input class="w85" type="number" min="0" placeholder="Width mm" value="'+p.w+'" oninput="glass['+i+'].w=this.value;renderGlass()">';
+    h+='<span class="hint">×</span>';
+    h+='<input class="w85" type="number" min="0" placeholder="Height mm" value="'+p.h+'" oninput="glass['+i+'].h=this.value;renderGlass()">';
+    h+='<span class="hint">Qty</span>';
+    h+='<input class="w50" type="number" min="1" value="'+p.qty+'" oninput="glass['+i+'].qty=this.value;renderGlass()">';
+    h+='<span class="hint">'+(area>0?area.toFixed(3)+' m²':'')+'</span>';
+    h+='<span class="gtot">'+(tot>0?'£'+f(tot):'—')+'</span>';
+    if(glass.length>1) h+='<button class="rmbtn" onclick="glass.splice('+i+',1);renderGlass()">✕</button>';
+    h+='</div>';
+  }
+  c.innerHTML=h;
+}
+
+function addGlass(){glass.push({type:'Clear',w:'',h:'',qty:1});renderGlass();}
+
+function renderGates(){
+  var c=document.getElementById('gaterows');
+  var h='';
+  for(var i=0;i<gates.length;i++){
+    var g=gates[i];
+    var wi=parseInt(g.w)||1000, hi=parseInt(g.h)||900;
+    var werr=wi>1200, herr=hi>1200;
+    var qty=parseFloat(g.qty)||1;
+    var tot=qty*129.60;
+    h+='<div class="grow">';
+    var opts='';
+    for(var j=0;j<GATE_C.length;j++) opts+='<option'+(GATE_C[j]===g.color?' selected':'')+'>'+GATE_C[j]+'</option>';
+    h+='<select class="wide" onchange="gates['+i+'].color=this.value;renderGates()">'+opts+'</select>';
+    h+='<span class="hint">W</span>';
+    h+='<input class="w80" type="number" min="1" max="1200" value="'+g.w+'" style="border-color:'+(werr?'#e55':'#ddd')+'" oninput="gates['+i+'].w=this.value;renderGates()">';
+    h+='<span class="hint">×</span>';
+    h+='<span class="hint">H</span>';
+    h+='<input class="w80" type="number" min="1" max="1200" value="'+g.h+'" style="border-color:'+(herr?'#e55':'#ddd')+'" oninput="gates['+i+'].h=this.value;renderGates()">';
+    h+='<span class="hint">mm Qty</span>';
+    h+='<input class="w50" type="number" min="1" value="'+g.qty+'" oninput="gates['+i+'].qty=this.value;renderGates()">';
+    h+='<span class="gtot">£'+f(tot)+'</span>';
+    if(gates.length>1) h+='<button class="rmbtn" onclick="gates.splice('+i+',1);renderGates()">✕</button>';
+    if(werr||herr) h+='<span class="err">Max size is 1200mm × 1200mm</span>';
+    h+='</div>';
+  }
+  c.innerHTML=h;
+}
+
+function addGate(){gates.push({color:'White',w:'1000',h:'900',qty:1});renderGates();}
+
+function generateQuote(){
+  var customer=document.getElementById('cname').value;
+  var ref=document.getElementById('cref').value;
+  var today=new Date().toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});
+  var all=[];
+  for(var k in items){ if(items[k]) all.push(items[k]); }
+  for(var i=0;i<glass.length;i++){
+    var p=glass[i];
+    var w=parseFloat(p.w)||0,h=parseFloat(p.h)||0,qty=parseFloat(p.qty)||1;
+    var area=(w/1000)*(h/1000)*qty;
+    var pp=p.type==='Clear'?50:90;
+    if(area>0) all.push({label:'Glass '+p.type+' ('+p.w+'×'+p.h+'mm ×'+qty+')',qty:area.toFixed(3),unit:'m²',price:pp,total:area*pp});
+  }
+  for(var i=0;i<gates.length;i++){
+    var g=gates[i];
+    var qty=parseFloat(g.qty)||1;
+    var wi=parseInt(g.w)||1000, hi=parseInt(g.h)||900;
+    var besp=(wi!==1000||hi!==900)?', made to order, 4wk lead time':'';
+    all.push({label:'Gate – '+g.color+' ('+wi+'mm × '+hi+'mm'+besp+')',qty:qty,unit:'gate',price:129.60,total:qty*129.60});
+  }
+  var sub=0; for(var i=0;i<all.length;i++) sub+=all[i].total;
+  var vat=sub*0.20, grand=sub+vat;
+  var rows='';
+  if(all.length===0){
+    rows='<p class="empty">No items added yet. Enter quantities above.</p>';
+  } else {
+    rows='<table><thead><tr><th>Item</th><th class="r">Qty</th><th class="r">Unit Price</th><th class="rr">Total</th></tr></thead><tbody>';
+    for(var i=0;i<all.length;i++){
+      var it=all[i];
+      rows+='<tr><td>'+it.label+'</td><td class="r">'+it.qty+' '+it.unit+'</td><td class="r">£'+f(it.price)+'</td><td class="rr">£'+f(it.total)+'</td></tr>';
+    }
+    rows+='</tbody></table>';
+    rows+='<div class="tots"><div class="trow"><span>Subtotal (exc. VAT)</span><span>£'+f(sub)+'</span></div><div class="trow"><span>VAT (20%)</span><span>£'+f(vat)+'</span></div><div class="trow grand"><span>Total (inc. VAT)</span><span>£'+f(grand)+'</span></div></div>';
+    rows+='<div class="fnote">All prices exclude VAT unless stated. Trade price list valid June 2026.<br>enquiries@dmdecking.co.uk | 01786 450936</div>';
+    rows+='<button class="prbtn" onclick="window.print()">🖨 Print / Save as PDF</button>';
+  }
+  document.getElementById('quoteout').innerHTML='<div class="qcard"><h2>Quote Summary</h2>'+(customer?'<p class="qmeta">Customer: <strong>'+customer+'</strong></p>':'')+(ref?'<p class="qmeta">Reference: <strong>'+ref+'</strong></p>':'')+'<p class="qdate">Generated: '+today+'</p>'+rows+'</div>';
+  document.getElementById('quoteout').scrollIntoView({behavior:'smooth'});
+}
+
+// Build sections
+document.getElementById('s-boards').innerHTML=
+  colorBlock(BOARD_C,48.60,'board','b4877','4877mm Board')+
+  colorBlock(BOARD_C,61.99,'board','b6150','6150mm Board')+
+  colorBlock(BOARD_C,17.28,'length','trim6','6m Trim')+
+  colorBlock(BOARD_C,16.20,'length','start36','3.6m Starter');
+
+document.getElementById('s-skirting').innerHTML=
+  simpleBlock([
+    {label:'White',price:17.28,unit:'length',key:'skW'},
+    {label:'Beige',price:21.06,unit:'length',key:'skB'},
+    {label:'Painswick Grey',price:21.06,unit:'length',key:'skPG'}
+  ])+
+  colorBlock(SKIRT_F,34.56,'length','skF','Foiled Skirting');
+
+document.getElementById('s-corner').innerHTML=
+  colorBlock(CORN_S,5.72,'trim','ctS','Standard Corner Trim')+
+  colorBlock(CORN_F,13.72,'trim','ctF','Foiled Corner Trim');
+
+document.getElementById('s-balnf').innerHTML=
+  colorBlock(BAL_NF,42.34,'post','nfPost','Post 4.8m')+
+  colorBlock(BAL_NF,13.39,'rail','nfR18','Rail (routed) 1.8m')+
+  colorBlock(BAL_NF,17.82,'rail','nfR24','Rail (routed) 2.4m')+
+  colorBlock(BAL_NF,27.00,'rail','nfRPl','Rail (plain) 4.8m')+
+  colorBlock(BAL_NF,2.27,'bracket','nfBr','Bracket')+
+  colorBlock(BAL_NF,10.04,'bracket','nfSBr','Stair Bracket')+
+  colorBlock(BAL_NF,2.16,'picket','nfPk','Picket')+
+  colorBlock(BAL_NF,1.62,'cap','nfCp','Cap');
+
+document.getElementById('s-balf').innerHTML=
+  colorBlock(BAL_F,63.50,'post','fPost','Post 4.8m')+
+  colorBlock(BAL_F,25.06,'rail','fR18','Rail (routed) 1.8m')+
+  colorBlock(BAL_F,27.22,'rail','fR24','Rail (routed) 2.4m')+
+  colorBlock(BAL_F,48.60,'rail','fRPl','Rail (plain) 4.8m')+
+  colorBlock(BAL_F,7.02,'bracket','fBr','Bracket')+
+  colorBlock(BAL_F,18.36,'bracket','fSBr','Stair Bracket')+
+  colorBlock(BAL_F,4.86,'picket','fPk','Picket')+
+  colorBlock(BAL_F,6.05,'cap','fCp','Cap');
+
+document.getElementById('s-steel').innerHTML=
+  simpleBlock([
+    {label:'2390mm',price:5.40,unit:'length',key:'st2390'},
+    {label:'1790mm',price:4.32,unit:'length',key:'st1790'}
+  ]);
+
+document.getElementById('s-clamps').innerHTML=
+  simpleBlock([
+    {label:'Side Clamp',price:6.48,unit:'clamp',key:'sClamp'},
+    {label:'Base Clamp',price:10.80,unit:'clamp',key:'bClamp'}
+  ]);
+
+document.getElementById('s-timber').innerHTML=
+  simpleBlock([
+    {label:'4.8m x 145mm x 45mm',price:12.00,unit:'length',key:'tim145'},
+    {label:'3.6m x 92mm x 92mm',price:14.00,unit:'length',key:'tim92'}
+  ]);
+
+renderGlass();
+renderGates();
+</script>
+</body>
+</html>
